@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/trovejenkins1/trove-quicky:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/trovejenkins1/trove-quicky:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: trove-quicky
+        chartPath: charts/trove-quicky
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/trovejenkins1/trove-quicky'
+          image.tag: '{{.DIGEST_HEX}}'
